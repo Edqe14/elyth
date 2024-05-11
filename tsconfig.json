@@ -109,6 +109,9 @@
       "@controllers/*": [
         "./src/app/http/controllers/*"
       ],
+      "@console/*": [
+        "./src/app/console/*"
+      ],
     }
   }
 }

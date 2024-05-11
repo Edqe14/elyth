@@ -3,7 +3,7 @@ import { Controller } from "./controller";
 
 export class TestController extends Controller {
   public async index(ctx: ContextForRoute<"/api">) {
-    return ctx.redirect("/api/users/:id", { id: "1" });
+    return ctx.redirect("/api/albums/:id", { id: "1" });
   }
 
   public todos(ctx: ContextForRoute) {

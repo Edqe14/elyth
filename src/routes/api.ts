@@ -8,4 +8,6 @@ export default app
   .get("/users/:id", [TestController, "users"])
   .group("/todos", (group) =>
     group.middleware(TestMiddleware).get("/", [TestController, "todos"])
-  );
+  )
+  .post("/todos", [TestController, "todos"])
+  .resource("albums", TestController);

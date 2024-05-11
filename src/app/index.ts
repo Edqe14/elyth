@@ -17,7 +17,7 @@ export type AppBaseTypes = SingletonBase & {
     status: (status: number) => AppBaseTypes["decorator"];
     setCookie: (key: string, value: CookieOptions) => AppBaseTypes["decorator"];
     redirect: <const Route extends AvailableRoutes>(
-      url: Route,
+      url: Route | string,
       params?: Route extends `${string}/${":" | "*"}${string}`
         ? Record<GetPathParameter<Route>, string>
         : never,
@@ -89,8 +89,8 @@ export class App extends Elysia<"", false, AppBaseTypes> {
       };
 
       const originalRedirect = ctx.redirect;
-      ctx.redirect = <const Route extends AvailableRoutes | string>(
-        url: Route,
+      ctx.redirect = <const Route extends AvailableRoutes>(
+        url: Route | string,
         paramsOrStatus?:
           | (Route extends `${string}/${":" | "*"}${string}`
               ? Record<GetPathParameter<Route>, string>
