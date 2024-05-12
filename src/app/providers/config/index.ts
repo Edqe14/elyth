@@ -11,17 +11,17 @@ export class ConfigProvider {
     this.directory = directory;
   }
 
-  public async get<T>(key: string): Promise<T | undefined> {
+  public get<T>(key: string): T | undefined {
     return (this.cache.get(key) as T) || this.parse<T>(key);
   }
 
-  protected async parse<T>(key: string) {
+  protected parse<T>(key: string) {
     if (this.cache.has(key)) return this.cache.get(key) as T;
 
     return this.load<T>(key);
   }
 
-  public async load<T>(key: string) {
+  public load<T>(key: string) {
     // Key is dot-separated
     const [file, ...path] = key.split(".");
     if (this.cache.has(key)) return this.loadKey<T>(file, path.join("."));
@@ -29,7 +29,7 @@ export class ConfigProvider {
     const filePath = join(this.directory, `${file}`);
 
     try {
-      const module = await import(filePath);
+      const module = require(filePath) as { default: any };
       const config = module.default;
 
       if (!config) throw new ConfigError(`Config file for "${file}" is empty`);
@@ -43,7 +43,7 @@ export class ConfigProvider {
     }
   }
 
-  public async loadKey<T>(module: string, key: string) {
+  public loadKey<T>(module: string, key: string) {
     if (this.cache.has(`${module}.${key}`)) return;
 
     const property = getProperty(this.cache.get(module)!, key) as T | undefined;

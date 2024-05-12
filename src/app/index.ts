@@ -8,6 +8,7 @@ import type { AvailableRoutes } from "@configs/routes";
 import type { Response as BunResponse } from "bun-types/fetch";
 import { LoggerLevel, LoggerProvider } from "@providers/logger";
 import staticPlugin from "@elysiajs/static";
+import { Html, html } from "@elysiajs/html";
 
 export type AppBaseTypes = SingletonBase & {
   decorator: {
@@ -15,6 +16,11 @@ export type AppBaseTypes = SingletonBase & {
     utils: typeof UtilsProvider;
     cache: MemoryCacheProvider;
     logger: LoggerProvider;
+    render: <T extends (props: any) => JSX.Element>(
+      ...args: Parameters<T>[0] extends undefined
+        ? [component: T]
+        : [component: T, data: Parameters<T>[0]]
+    ) => Promise<BunResponse>;
     setHeader: (key: string, value: string) => AppBaseTypes["decorator"];
     setStatus: (status: number) => AppBaseTypes["decorator"];
     status: (status: number) => AppBaseTypes["decorator"];
@@ -60,11 +66,12 @@ export class App extends Elysia<"", false, AppBaseTypes> {
     this.decorateSetters();
 
     this.use(staticPlugin());
+    this.use(html());
 
     // Load configurations
-    await this.configurations.load("app");
+    this.configurations.load("app");
 
-    if (await this.configurations.get("app.debug")) {
+    if (this.configurations.get<boolean>("app.debug")) {
       this.debug();
       this.logger.setLevel(LoggerLevel.DEBUG);
     }
@@ -110,7 +117,7 @@ export class App extends Elysia<"", false, AppBaseTypes> {
 
         if (typeof paramsOrStatus === "object") {
           for (const [key, value] of Object.entries(paramsOrStatus)) {
-            newUrl = url.replaceAll(`:${key}`, value);
+            newUrl = url.replaceAll(`:${key}`, value as any);
           }
         } else {
           status = paramsOrStatus;
@@ -120,13 +127,24 @@ export class App extends Elysia<"", false, AppBaseTypes> {
       };
 
       ctx.json = (data) => {
-        ctx.set.headers["Content-Type"] = "application/json";
+        ctx.setHeader("Content-Type", "application/json");
 
         return new Response(JSON.stringify(data), {
           status: (ctx.set.status as number) ?? 200,
           headers: ctx.set.headers,
         });
       };
+
+      ctx.render = (async (View, data) => {
+        const body: string = await Html.createElement(View, data);
+
+        ctx.setHeader("Content-Type", "text/html");
+
+        return new Response(body, {
+          status: (ctx.set.status as number) ?? 200,
+          headers: ctx.set.headers,
+        });
+      }) as typeof ctx.render;
     });
   }
 

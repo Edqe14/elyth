@@ -1,7 +1,7 @@
 import Elysia, { Handler, RouteSchema } from "elysia";
 import type { App, AppBaseTypes } from ".";
 import type { Controller } from "./http/controllers/controller";
-import type { Middleware } from "./middleware";
+import type { Middleware } from "./http/middlewares/middleware";
 
 export class Router<
   BaseTypes extends AppBaseTypes = AppBaseTypes,

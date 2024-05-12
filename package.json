@@ -7,12 +7,14 @@
     "dev": "bun run --watch src/app/console/mvc.ts"
   },
   "dependencies": {
+    "@elysiajs/html": "^1.0.2",
     "@elysiajs/static": "^1.0.3",
     "chalk": "^5.3.0",
     "change-case": "^5.4.4",
     "commander": "^12.0.0",
     "dot-prop": "^9.0.0",
-    "elysia": "latest"
+    "elysia": "latest",
+    "vite": "^5.2.11"
   },
   "devDependencies": {
     "bun-types": "latest"

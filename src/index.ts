@@ -1,6 +1,7 @@
 import { App } from "@/app";
 
 export const app = new App();
+export const config = app.configurations;
 await app.init();
 
 if (!process.env.CI) {

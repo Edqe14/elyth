@@ -1,7 +1,9 @@
 import { app } from "@/index";
+import Welcome from "@/resources/views/welcome";
 
 export default app
   .createRouter()
-  .get("/", () => "hi route!")
-  .get("/test", () => "test route!")
-  .get("/test/:id", (ctx) => `test route with id: ${ctx.params.id}`);
+  .get("/", (ctx) => ctx.render(Welcome, { name: "Elysia" }))
+  .get("/json", () => ({
+    message: "Hi",
+  }));
