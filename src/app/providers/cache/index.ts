@@ -1,5 +1,5 @@
 // Memory cache for storing data in memory
-export class Cache {
+export class MemoryCacheProvider {
   private cache = new Map<string, any>();
 
   public set<T = any>(key: string, value: T) {

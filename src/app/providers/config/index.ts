@@ -2,7 +2,7 @@ import { join } from "path/posix";
 import { ConfigError } from "./configError";
 import { getProperty } from "dot-prop";
 
-export class Config {
+export class ConfigProvider {
   public directory: string;
 
   public readonly cache = new Map<string, any>();

@@ -1,8 +1,11 @@
-import { Command as Commander, Help } from "commander";
+import { Command as Commander } from "commander";
 import { Command } from "./command";
 import { join } from "path";
+import { LoggerProvider } from "../providers/logger";
 
 export class MVC extends Commander {
+  public readonly logger = new LoggerProvider();
+
   constructor() {
     super("mvc");
 
@@ -11,7 +14,9 @@ export class MVC extends Commander {
     this.arguments("<command>");
     this.helpCommand("help");
     this.description("Elysia MVC CLI tool");
+    this.allowUnknownOption(true);
     this.parse();
+    this.allowUnknownOption(false);
   }
 
   public async run() {
@@ -38,7 +43,7 @@ export class MVC extends Commander {
     }
   }
 
-  public createHelp(): Help {
+  public createHelp() {
     const glob = new Bun.Glob("**/*.ts");
     const files = glob.scanSync(join(__dirname, "commands"));
 
@@ -55,7 +60,7 @@ export class MVC extends Commander {
       instance.register();
     }
 
-    return new Help();
+    return super.createHelp();
   }
 }
 

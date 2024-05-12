@@ -1,17 +1,19 @@
 import { Context, CookieOptions, Elysia, SingletonBase } from "elysia";
-import { Config } from "@providers/config";
-import { Utils } from "@providers/utils";
-import { Cache } from "@providers/cache";
+import { ConfigProvider } from "@providers/config";
+import { UtilsProvider } from "@providers/utils";
+import { MemoryCacheProvider } from "@providers/cache";
 import { Router } from "./router";
 import type { GetPathParameter } from "elysia/dist/types";
 import type { AvailableRoutes } from "@configs/routes";
 import type { Response as BunResponse } from "bun-types/fetch";
+import { LoggerLevel, LoggerProvider } from "@providers/logger";
 
 export type AppBaseTypes = SingletonBase & {
   decorator: {
-    config: Config;
-    utils: typeof Utils;
-    cache: Cache;
+    config: ConfigProvider;
+    utils: typeof UtilsProvider;
+    cache: MemoryCacheProvider;
+    logger: LoggerProvider;
     setHeader: (key: string, value: string) => AppBaseTypes["decorator"];
     setStatus: (status: number) => AppBaseTypes["decorator"];
     status: (status: number) => AppBaseTypes["decorator"];
@@ -36,9 +38,10 @@ export type ContextForRoute<Path extends string = ""> = Context<
 >;
 
 export class App extends Elysia<"", false, AppBaseTypes> {
-  public readonly configurations = new Config("@/configs");
-  public readonly utils = Utils;
-  public readonly cache = new Cache();
+  public readonly configurations = new ConfigProvider("@/configs");
+  public readonly utils = UtilsProvider;
+  public readonly cache = new MemoryCacheProvider();
+  public readonly logger = new LoggerProvider();
 
   constructor() {
     super();
@@ -52,6 +55,7 @@ export class App extends Elysia<"", false, AppBaseTypes> {
     this.decorate("config", this.configurations);
     this.decorate("utils", this.utils);
     this.decorate("cache", this.cache);
+    this.decorate("logger", this.logger);
     this.decorateSetters();
 
     // Load configurations
@@ -59,6 +63,7 @@ export class App extends Elysia<"", false, AppBaseTypes> {
 
     if (await this.configurations.get("app.debug")) {
       this.debug();
+      this.logger.setLevel(LoggerLevel.DEBUG);
     }
 
     await this.loadRoutes();
@@ -108,8 +113,6 @@ export class App extends Elysia<"", false, AppBaseTypes> {
           status = paramsOrStatus;
         }
 
-        console.log(newUrl);
-
         return originalRedirect(newUrl, status);
       };
 
@@ -143,12 +146,12 @@ export class App extends Elysia<"", false, AppBaseTypes> {
     });
 
     this.onAfterHandle(async (ctx) => {
-      console.log(
-        `🦊 [${ctx.debugId}] ${ctx.request.method} ${ctx.request.url} took ${
+      this.logger.debug(
+        `[${ctx.debugId}] ${ctx.request.method} ${ctx.request.url} took ${
           Date.now() - ctx.debugTime!
-        }ms`
+        }ms`,
+        await ctx.response
       );
-      console.log(await ctx.response);
     });
   }
 }

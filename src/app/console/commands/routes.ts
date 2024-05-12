@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import { Command } from "../command";
+import { Command } from "@console/command";
 
 export default class ListRoutes extends Command {
   public signature = "routes";

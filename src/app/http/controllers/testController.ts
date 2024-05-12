@@ -1,5 +1,5 @@
 import type { ContextForRoute } from "@/app";
-import { Controller } from "./controller";
+import { Controller } from "@controllers/controller";
 
 export class TestController extends Controller {
   public async index(ctx: ContextForRoute<"/api">) {
