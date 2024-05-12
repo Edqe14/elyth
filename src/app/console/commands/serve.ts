@@ -23,6 +23,8 @@ export default class Serve extends Command {
 
     await server.listen();
 
-    this.logger.info("Vite server started on http://localhost:5173");
+    this.logger.info(
+      `Vite server started on http://localhost:${server.config.server.port}`
+    );
   }
 }
