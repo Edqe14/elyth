@@ -11,6 +11,10 @@ export class ConfigProvider {
     this.directory = directory;
   }
 
+  public set<T>(key: string, value: T) {
+    this.cache.set(key, value);
+  }
+
   public get<T>(key: string): T | undefined {
     return (this.cache.get(key) as T) || this.parse<T>(key);
   }

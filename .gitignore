@@ -41,5 +41,5 @@ yarn-error.log*
 package-lock.json
 **/*.bun
 
-public/build/*
-!public/build/.gitkeep
+public/build
+.vite

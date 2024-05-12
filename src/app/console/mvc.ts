@@ -5,18 +5,21 @@ import { LoggerProvider } from "../providers/logger";
 
 export class MVC extends Commander {
   public readonly logger = new LoggerProvider();
+  public readonly isProduction: boolean;
 
   constructor() {
     super("mvc");
 
-    process.env.CI = "true";
-
     this.arguments("<command>");
     this.helpCommand("help");
     this.description("Elysia MVC CLI tool");
+    this.option("--production", "Run in production mode");
+
     this.allowUnknownOption(true);
     this.parse();
     this.allowUnknownOption(false);
+
+    this.isProduction = this.opts().production;
   }
 
   public async run() {

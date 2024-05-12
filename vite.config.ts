@@ -8,5 +8,6 @@ export default defineConfig({
       // overwrite default .html entry
       input: "./src/resources/js/main.js",
     },
+    outDir: "./public/build",
   },
 });

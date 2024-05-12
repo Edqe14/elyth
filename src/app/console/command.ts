@@ -2,7 +2,7 @@ import { LoggerProvider } from "@providers/logger";
 import type { MVC } from "./mvc";
 
 export abstract class Command {
-  private program: MVC;
+  protected program: MVC;
   public abstract signature: string;
   public abstract description: string;
 

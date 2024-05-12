@@ -6,6 +6,8 @@ export default class ListRoutes extends Command {
   public description = "List all available routes";
 
   public async handle() {
+    process.env.CLI = "true";
+
     const { app } = await import("@/index");
 
     const routes = app.getRoutes().map((route) => {

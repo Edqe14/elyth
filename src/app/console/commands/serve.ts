@@ -7,7 +7,9 @@ export default class Serve extends Command {
   public description = "List all available routes";
 
   public async handle() {
-    delete process.env.CI;
+    if (this.program.isProduction) {
+      process.env.NODE_ENV = "production";
+    }
 
     const { app } = await import("@/index");
 

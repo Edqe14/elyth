@@ -71,6 +71,13 @@ export class App extends Elysia<"", false, AppBaseTypes> {
     // Load configurations
     this.configurations.load("app");
 
+    // Default environment configuration
+    if (process.env.NODE_ENV === "production") {
+      this.logger.setLevel(LoggerLevel.INFO);
+      this.configurations.set("app.environment", "production");
+      this.configurations.set("app.debug", false);
+    }
+
     if (this.configurations.get<boolean>("app.debug")) {
       this.debug();
       this.logger.setLevel(LoggerLevel.DEBUG);

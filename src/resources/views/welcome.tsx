@@ -11,7 +11,7 @@ export default function Welcome(props: { name: string }) {
       <body>
         <h1>Welcome, {props.name}</h1>
 
-        <Vite file="js/main.js" />
+        <Vite>{["js/main.js", "css/style.css"]}</Vite>
       </body>
     </html>
   );

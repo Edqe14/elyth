@@ -3,7 +3,7 @@
   "version": "1.0.50",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "mvc": "bun run src/app/console/mvc.ts",
+    "mvc": "bun run src/app/console/mvc.ts --production",
     "dev": "bun run --watch src/app/console/mvc.ts"
   },
   "dependencies": {
