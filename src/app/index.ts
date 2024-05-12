@@ -7,6 +7,7 @@ import type { GetPathParameter } from "elysia/dist/types";
 import type { AvailableRoutes } from "@configs/routes";
 import type { Response as BunResponse } from "bun-types/fetch";
 import { LoggerLevel, LoggerProvider } from "@providers/logger";
+import staticPlugin from "@elysiajs/static";
 
 export type AppBaseTypes = SingletonBase & {
   decorator: {
@@ -57,6 +58,8 @@ export class App extends Elysia<"", false, AppBaseTypes> {
     this.decorate("cache", this.cache);
     this.decorate("logger", this.logger);
     this.decorateSetters();
+
+    this.use(staticPlugin());
 
     // Load configurations
     await this.configurations.load("app");
@@ -146,11 +149,17 @@ export class App extends Elysia<"", false, AppBaseTypes> {
     });
 
     this.onAfterHandle(async (ctx) => {
+      const formatMethod =
+        this.logger.httpMethodColors[
+          ctx.request.method as keyof typeof this.logger.httpMethodColors
+        ];
+
+      const debugId = this.logger.color.yellow(ctx.debugId);
+      const url = this.logger.color.dim(ctx.request.url);
+      const time = this.logger.color.yellow(Date.now() - ctx.debugTime!);
+
       this.logger.debug(
-        `[${ctx.debugId}] ${ctx.request.method} ${ctx.request.url} took ${
-          Date.now() - ctx.debugTime!
-        }ms`,
-        await ctx.response
+        `[${debugId}] ${formatMethod(ctx.request.method)} ${url} took ${time}ms`
       );
     });
   }

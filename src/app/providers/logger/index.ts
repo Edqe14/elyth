@@ -22,6 +22,13 @@ export class LoggerProvider {
   private level: LoggerLevel = LoggerLevel.INFO;
 
   public readonly color = chalk;
+  public readonly httpMethodColors = {
+    GET: (text: string) => chalk.bold.green(text),
+    POST: (text: string) => chalk.bold.blue(text),
+    PUT: (text: string) => chalk.bold.yellow(text),
+    PATCH: (text: string) => chalk.bold.cyan(text),
+    DELETE: (text: string) => chalk.bold.red(text),
+  };
 
   constructor(options?: LoggerOptions) {
     this.writer = options?.writer ?? process.stdout;
