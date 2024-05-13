@@ -1,4 +1,4 @@
-import { ContextForRoute } from "@/app";
+import type { ContextForRoute } from "@/app";
 
 export abstract class Middleware {
   /**
