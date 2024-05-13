@@ -1,21 +1,15 @@
 import { Context, CookieOptions, Elysia, SingletonBase } from "elysia";
-import { ConfigProvider } from "@providers/config";
-import { UtilsProvider } from "@providers/utils";
-import { MemoryCacheProvider } from "@providers/cache";
 import { Router } from "./router";
 import type { GetPathParameter } from "elysia/dist/types";
 import type { AvailableRoutes } from "@configs/routes";
 import type { Response as BunResponse } from "bun-types/fetch";
-import { LoggerLevel, LoggerProvider } from "@providers/logger";
+import { LoggerLevel } from "@providers/logger";
 import staticPlugin from "@elysiajs/static";
 import { Html, html } from "@elysiajs/html";
+import providers from "./providers";
 
 export type AppBaseTypes = SingletonBase & {
   decorator: {
-    config: ConfigProvider;
-    utils: typeof UtilsProvider;
-    cache: MemoryCacheProvider;
-    logger: LoggerProvider;
     render: <T extends (props: any) => JSX.Element>(
       ...args: Parameters<T>[0] extends undefined
         ? [component: T]
@@ -35,7 +29,7 @@ export type AppBaseTypes = SingletonBase & {
     json: <T>(data: T) => Response;
     debugId?: string;
     debugTime?: number;
-  };
+  } & typeof providers;
 };
 
 export type ContextForRoute<Path extends string = ""> = Context<
@@ -45,10 +39,7 @@ export type ContextForRoute<Path extends string = ""> = Context<
 >;
 
 export class App extends Elysia<"", false, AppBaseTypes> {
-  public readonly configurations = new ConfigProvider("@/configs");
-  public readonly utils = UtilsProvider;
-  public readonly cache = new MemoryCacheProvider();
-  public readonly logger = new LoggerProvider();
+  public readonly providers = providers;
 
   constructor() {
     super();
@@ -59,28 +50,27 @@ export class App extends Elysia<"", false, AppBaseTypes> {
   }
 
   async init() {
-    this.decorate("config", this.configurations);
-    this.decorate("utils", this.utils);
-    this.decorate("cache", this.cache);
-    this.decorate("logger", this.logger);
+    Object.entries(providers).forEach(([key, value]) =>
+      this.decorate(key, value)
+    );
     this.decorateSetters();
 
     this.use(staticPlugin());
     this.use(html());
 
     // Load configurations
-    this.configurations.load("app");
+    this.providers.config.load("app");
 
     // Default environment configuration
     if (process.env.NODE_ENV === "production") {
-      this.logger.setLevel(LoggerLevel.INFO);
-      this.configurations.set("app.environment", "production");
-      this.configurations.set("app.debug", false);
+      this.providers.logger.setLevel(LoggerLevel.INFO);
+      this.providers.config.set("app.environment", "production");
+      this.providers.config.set("app.debug", false);
     }
 
-    if (this.configurations.get<boolean>("app.debug")) {
+    if (this.providers.config.get<boolean>("app.debug")) {
       this.debug();
-      this.logger.setLevel(LoggerLevel.DEBUG);
+      this.providers.logger.setLevel(LoggerLevel.DEBUG);
     }
 
     await this.loadRoutes();
@@ -169,21 +159,24 @@ export class App extends Elysia<"", false, AppBaseTypes> {
 
   private debug() {
     this.onBeforeHandle((ctx) => {
-      ctx.debugId = this.utils.randomId(6);
+      ctx.debugId = this.providers.utils.randomId(6);
       ctx.debugTime = Date.now();
     });
 
     this.onAfterHandle(async (ctx) => {
       const formatMethod =
-        this.logger.httpMethodColors[
-          ctx.request.method as keyof typeof this.logger.httpMethodColors
+        this.providers.logger.httpMethodColors[
+          ctx.request
+            .method as keyof typeof this.providers.logger.httpMethodColors
         ];
 
-      const debugId = this.logger.color.yellow(ctx.debugId);
-      const url = this.logger.color.dim(ctx.request.url);
-      const time = this.logger.color.yellow(Date.now() - ctx.debugTime!);
+      const debugId = this.providers.logger.color.yellow(ctx.debugId);
+      const url = this.providers.logger.color.dim(ctx.request.url);
+      const time = this.providers.logger.color.yellow(
+        Date.now() - ctx.debugTime!
+      );
 
-      this.logger.debug(
+      this.providers.logger.debug(
         `[${debugId}] ${formatMethod(ctx.request.method)} ${url} took ${time}ms`
       );
     });

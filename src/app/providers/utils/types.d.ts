@@ -24,3 +24,4 @@ declare type UnionToIntersection<U> = (
   : never;
 
 declare type Promisable<T> = T | Promise<T>;
+declare type Writeable<T> = { -readonly [P in keyof T]: Writeable<T[P]> };

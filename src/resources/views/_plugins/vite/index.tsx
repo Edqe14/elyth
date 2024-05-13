@@ -1,17 +1,17 @@
-import { app, config } from "@/index";
 import viteConfig from "@/../vite.config";
 import { join } from "path/posix";
 import type { Manifest } from "vite";
+import providers from "@providers/index";
 
+const { config } = providers;
 const vitePort = viteConfig.server?.port ?? 5173;
-
 let viteManifest: Manifest = {};
 
-if (app.configurations.get("app.environment") === "production") {
+if (providers.config.get("app.environment") === "production") {
   try {
     viteManifest = require(join(process.cwd(), ".vite", "manifest.json"));
   } catch (error) {
-    app.logger.error(
+    providers.logger.error(
       "Vite manifest not found, please build the application first"
     );
     process.exit(1);

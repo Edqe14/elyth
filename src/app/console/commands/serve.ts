@@ -1,4 +1,4 @@
-import type { App } from "@/app";
+import providers from "@/app/providers";
 import { Command } from "@console/command";
 import { createServer } from "vite";
 
@@ -11,13 +11,12 @@ export default class Serve extends Command {
       process.env.NODE_ENV = "production";
     }
 
-    const { app } = await import("@/index");
-
-    await this.startVite(app);
+    await import("@/index");
+    await this.startVite();
   }
 
-  public async startVite(app: App) {
-    if (app.configurations.get("app.environment") === "production") return;
+  public async startVite() {
+    if (providers.config.get("app.environment") === "production") return;
 
     const server = await createServer({
       root: process.cwd(),
