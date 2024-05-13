@@ -115,6 +115,9 @@
       "@console/*": [
         "./src/app/console/*"
       ],
+      "@middlewares/*": [
+        "./src/app/http/middlewares/*"
+      ],
     }
   }
 }
