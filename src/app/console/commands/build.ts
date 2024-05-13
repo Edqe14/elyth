@@ -3,7 +3,7 @@ import { build } from "vite";
 import viteConfig from "@/../../vite.config";
 import { $ } from "bun";
 
-export default class Serve extends Command {
+export default class Build extends Command {
   public signature = "build";
   public description = "Build the application for production";
 

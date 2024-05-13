@@ -4,7 +4,7 @@ import { StubsProvider } from "@providers/stubs";
 import { camelCase } from "change-case";
 import { file } from "bun";
 
-export default class ListRoutes extends Command {
+export default class MakeController extends Command {
   public signature = "make:controller <name> {--force|f:Force_create}";
   public description = "Create a new controller";
 
