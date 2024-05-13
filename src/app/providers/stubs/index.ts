@@ -1,6 +1,7 @@
 import { join } from "path";
 import { MemoryCacheProvider } from "../cache";
 import { Stub } from "./stub";
+import { file } from "bun";
 
 export class StubsProvider {
   private cache = new MemoryCacheProvider();
@@ -9,11 +10,11 @@ export class StubsProvider {
   public async get(key: string): Promise<Stub | null> {
     if (this.cache.has(key)) return new Stub(this.cache.get<string>(key)!);
 
-    const file = Bun.file(join(this.directory, `${key}.stub.ts`));
+    const target = file(join(this.directory, `${key}.stub.ts`));
 
-    if (!(await file.exists())) return null;
+    if (!(await target.exists())) return null;
 
-    const content = await file.text();
+    const content = await target.text();
 
     return new Stub(content);
   }

@@ -1,10 +1,11 @@
 import { app, config } from "@/index";
 import viteConfig from "@/../vite.config";
 import { join } from "path/posix";
+import type { Manifest } from "vite";
 
 const vitePort = viteConfig.server?.port ?? 5173;
 
-let viteManifest: Record<string, string> = {};
+let viteManifest: Manifest = {};
 
 if (app.configurations.get("app.environment") === "production") {
   try {
@@ -18,11 +19,42 @@ if (app.configurations.get("app.environment") === "production") {
 }
 
 export default function Vite(props: { children: string[] }) {
-  // TODO: Add a check for production environment and replace with the production build
-  if (config.get("app.environment") === "production") return null;
+  if (config.get("app.environment") === "production") {
+    const usedAssets = Object.entries(viteManifest).filter(([key]) =>
+      props.children.includes(key)
+    );
+
+    return (
+      <>
+        {usedAssets.map(([, value]) => {
+          if (value.file.includes(".js")) {
+            return (
+              <>
+                <script
+                  type="module"
+                  src={`/public/build/${value.file}`}
+                ></script>
+
+                {value.css?.map((css) => (
+                  <link rel="stylesheet" href={`/public/build/${css}`} />
+                ))}
+              </>
+            );
+          }
+
+          if (value.file.includes(".css")) {
+            return (
+              <link rel="stylesheet" href={`/public/build/${value.file}`} />
+            );
+          }
+        })}
+      </>
+    );
+  }
 
   return (
     <>
+      <script>console.warn('[MVC] DEVELOPMENT MODE')</script>
       <script
         type="module"
         src={`http://localhost:${vitePort}/@vite/client`}
@@ -38,7 +70,7 @@ export default function Vite(props: { children: string[] }) {
           return (
             <script
               type="module"
-              src={`http://localhost:${vitePort}/src/resources/${child}`}
+              src={`http://localhost:${vitePort}/${child}`}
             ></script>
           );
         }
@@ -47,7 +79,7 @@ export default function Vite(props: { children: string[] }) {
           return (
             <link
               rel="stylesheet"
-              href={`http://localhost:${vitePort}/src/resources/${child}`}
+              href={`http://localhost:${vitePort}/${child}`}
             />
           );
         }

@@ -1,8 +1,8 @@
-import chalk from "chalk";
 import { join } from "path";
 import { Command } from "@console/command";
 import { StubsProvider } from "@providers/stubs";
 import { camelCase } from "change-case";
+import { file } from "bun";
 
 export default class ListRoutes extends Command {
   public signature = "make:controller <name> {--force|f:Force_create}";
@@ -12,8 +12,8 @@ export default class ListRoutes extends Command {
   private stubProvider = new StubsProvider();
 
   public async handle(name: string, options: Record<string, boolean>) {
-    const file = Bun.file(join(this.directory, `${camelCase(name)}.ts`));
-    if (await file.exists()) {
+    const target = file(join(this.directory, `${camelCase(name)}.ts`));
+    if (await target.exists()) {
       if (!options.force) {
         this.logger.error(`Controller "${name}" already exists`);
         return;
@@ -28,7 +28,7 @@ export default class ListRoutes extends Command {
 
     const content = stub.replace("name", name).render();
 
-    const writer = file.writer();
+    const writer = target.writer();
 
     writer.write(content);
     writer.end();

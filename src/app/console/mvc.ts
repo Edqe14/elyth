@@ -2,6 +2,7 @@ import { Command as Commander } from "commander";
 import { Command } from "./command";
 import { join } from "path";
 import { LoggerProvider } from "../providers/logger";
+import { Glob } from "bun";
 
 export class MVC extends Commander {
   public readonly logger = new LoggerProvider();
@@ -47,7 +48,7 @@ export class MVC extends Commander {
   }
 
   public createHelp() {
-    const glob = new Bun.Glob("**/*.ts");
+    const glob = new Glob("**/*.ts");
     const files = glob.scanSync(join(__dirname, "commands"));
 
     for (const file of files) {

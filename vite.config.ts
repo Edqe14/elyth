@@ -2,11 +2,13 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
   build: {
-    // generate .vite/manifest.json in outDir
     manifest: true,
     rollupOptions: {
-      // overwrite default .html entry
-      input: "./src/resources/js/main.js",
+      input: Array.from(
+        new Bun.Glob(
+          "./src/resources/{js,css}/**/*.{js,ts,jsx,tsx,css,scss,sass,less}"
+        ).scanSync()
+      ),
     },
     outDir: "./public/build",
   },
