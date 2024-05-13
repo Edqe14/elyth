@@ -21,33 +21,33 @@ export default class MakeProvider extends Command {
 
   public async handle(name: string, options: Record<string, boolean>) {
     const fileName = this.getFileName(name);
-    // const target = file(
-    //   options.single
-    //     ? join(this.directory, `${fileName}.ts`)
-    //     : join(this.directory, fileName, "index.ts")
-    // );
-    // if (await target.exists()) {
-    //   if (!options.force) {
-    //     this.logger.error(`Provider "${name}" already exists`);
-    //     return;
-    //   }
-    // }
+    const target = file(
+      options.single
+        ? join(this.directory, `${fileName}.ts`)
+        : join(this.directory, fileName, "index.ts")
+    );
+    if (await target.exists()) {
+      if (!options.force) {
+        this.logger.error(`Provider "${name}" already exists`);
+        return;
+      }
+    }
 
-    // const stub = await this.stubProvider.get("provider");
-    // if (!stub) return this.logger.error("Provider stub not found");
+    const stub = await this.stubProvider.get("provider");
+    if (!stub) return this.logger.error("Provider stub not found");
 
-    // const content = stub.replace("name", name).render();
+    const content = stub.replace("name", name).render();
 
-    // if (!options.single) {
-    //   await mkdir(join(this.directory, fileName), {
-    //     recursive: true,
-    //   });
-    // }
+    if (!options.single) {
+      await mkdir(join(this.directory, fileName), {
+        recursive: true,
+      });
+    }
 
-    // const writer = target.writer();
+    const writer = target.writer();
 
-    // writer.write(content);
-    // writer.end();
+    writer.write(content);
+    writer.end();
 
     this.appendProvider(fileName, name);
 
