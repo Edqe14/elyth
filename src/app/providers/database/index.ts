@@ -1,45 +1,35 @@
-import knex from "knex";
 import database from "@/configs/database";
+import { MemoryCacheProvider } from "../cache";
+import { Connection } from "./connection";
+import type { Knex } from "knex";
+
+type ConnectionKey = keyof (typeof database)["connection"];
 
 export class DatabaseProvider {
-  private destroyed = false;
-  private client = this.create();
+  private cache = new MemoryCacheProvider<string, Connection>();
 
-  public async connect() {
-    if (this.destroyed) {
-      this.client = this.create();
-    }
+  public getConfigFor(key: ConnectionKey): Knex.Config | undefined {
+    if (!database.connection[key]) return;
 
-    await this.client.raw("SELECT 1");
-  }
-
-  public async disconnect() {
-    await this.client.destroy();
-
-    this.destroyed = true;
-  }
-
-  get isDestroyed() {
-    return this.destroyed;
-  }
-
-  get connection() {
-    return this.client;
-  }
-
-  private create() {
-    return knex({
-      client: database.driver,
+    return {
       connection: {
-        connectionString: database.credentials.url,
-        host: database.credentials.host,
-        port: database.credentials.port,
-        user: database.credentials.user,
-        password: database.credentials.password,
-        database: database.credentials.database,
-        ssl: database.credentials.ssl,
-        filename: database.credentials.database,
+        ...database.connection[key],
+        connectionString: database.connection[key].url,
+        filename: database.connection[key].database,
       },
-    });
+    };
+  }
+
+  public connection(key = "default") {
+    if (this.cache.has(key)) return this.cache.get(key);
+
+    const config = this.getConfigFor(key as ConnectionKey);
+    if (!config) return;
+
+    const connection = new Connection(key, config);
+
+    this.cache.set(key, connection);
+
+    return connection;
   }
 }

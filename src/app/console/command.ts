@@ -57,7 +57,12 @@ export abstract class Command {
 
         const optionParts = option
           .split("|")
-          .map((v) => `${!v.trim().startsWith("--") ? "-" : ""}${v.trim()}`)
+          .map(
+            (v) =>
+              `${!v.trim().startsWith("--") ? "-" : ""}${v
+                .trim()
+                .replaceAll("_", " ")}`
+          )
           .toSorted((a, b) => a.length - b.length);
         const optionDescription = description?.trim()?.replaceAll("_", " ");
         const optionDefault = defaultVal?.trim() ?? false;

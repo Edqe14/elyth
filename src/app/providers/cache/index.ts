@@ -1,20 +1,20 @@
 // Memory cache for storing data in memory
-export class MemoryCacheProvider {
-  private cache = new Map<string, any>();
+export class MemoryCacheProvider<Key = string, Value = any> {
+  private cache = new Map<Key, Value>();
 
-  public set<T = any>(key: string, value: T) {
+  public set(key: Key, value: Value) {
     this.cache.set(key, value);
   }
 
-  public get<T = any>(key: string) {
-    return this.cache.get(key) as T | undefined;
+  public get(key: Key) {
+    return this.cache.get(key) as Value | undefined;
   }
 
-  public has(key: string) {
+  public has(key: Key) {
     return this.cache.has(key);
   }
 
-  public forget(key: string) {
+  public forget(key: Key) {
     this.cache.delete(key);
   }
 
@@ -24,9 +24,9 @@ export class MemoryCacheProvider {
    * @param ttl In milliseconds
    * @param callback Generate value if not exists
    */
-  public remember<T = any>(key: string, ttl: number, callback: () => T) {
+  public remember(key: Key, ttl: number, callback: () => Value) {
     if (this.has(key)) {
-      return this.get(key) as T;
+      return this.get(key) as Value;
     }
 
     const value = callback();

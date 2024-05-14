@@ -23,13 +23,17 @@ export class MVC extends Commander {
     this.isProduction = this.opts().production;
   }
 
+  private async importCommand(name: string) {
+    const path = name.replace(/:/g, "/");
+
+    return await import(`@console/commands/${path}`);
+  }
+
   public async run() {
     const [command] = this.args;
 
     try {
-      const cmd = await import(
-        `@console/commands/${command.replace(/:/g, "/")}`
-      );
+      const cmd = await this.importCommand(command);
 
       const CommandClass = cmd.default as
         | (new (program: MVC) => Command)
