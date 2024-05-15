@@ -12,11 +12,13 @@ export class DatabaseProvider {
     if (!database.connection[key]) return;
 
     return {
+      client: database.connection[key].driver,
       connection: {
         ...database.connection[key],
         connectionString: database.connection[key].url,
         filename: database.connection[key].database,
       },
+      debug: database.debug,
     };
   }
 

@@ -4,15 +4,25 @@ import { Connection } from "../connection";
 export class MigrationHelper {
   constructor(public connection: Connection) {}
 
+  public query<TRecord extends {} = any, TResult = {}[]>(table: string) {
+    return this.connection
+      .query<TRecord, TResult>(table)
+      .withSchema(database.migration.schema);
+  }
+
   public async createMigrationTable(tableName = "migrations", schema = "mvc") {
-    await this.connection.schema
-      .withSchema(schema)
-      .createTableIfNotExists(tableName, (table) => {
+    await this.connection.schema.createSchemaIfNotExists(schema);
+
+    const schemaDb = this.connection.schema.withSchema(schema);
+
+    if (!(await schemaDb.hasTable(tableName))) {
+      await schemaDb.createTable(tableName, (table) => {
         table.increments();
         table.string("group").defaultTo("0");
         table.string("name").unique().notNullable();
-        table.timestamps();
+        table.timestamps(true, true);
       });
+    }
   }
 
   public async ensureMigrationTables() {
@@ -23,9 +33,9 @@ export class MigrationHelper {
   }
 
   public async isLocked() {
-    const lock = await this.connection
-      .query<{ name: string }>()
-      .withSchema(database.migration.schema)
+    const lock = await this.query<{ name: string }>(
+      database.migration.tableName
+    )
       .where("name", "lock")
       .first();
 
@@ -33,20 +43,65 @@ export class MigrationHelper {
   }
 
   public async lock() {
-    await this.connection
-      .query(database.migration.tableName)
-      .insert({ name: "lock" });
+    await this.query(database.migration.tableName).insert({ name: "lock" });
   }
 
   public async unlock() {
-    await this.connection
-      .query(database.migration.tableName)
+    await this.query(database.migration.tableName)
       .where("name", "lock")
       .delete();
   }
 
-  public dropAllTables() {
-    // TODO: Implement this
-    throw new Error("Method not implemented.");
+  public async getMigrationsRecord() {
+    return this.query<{ name: string; group: string }>(
+      database.migration.tableName
+    )
+      .whereNot("name", "lock")
+      .select("name", "group");
+  }
+
+  public async insertMigrationRecord(name: string[], group: number) {
+    await this.query(database.migration.tableName).insert(
+      name.map((name) => ({ name, group }))
+    );
+  }
+
+  public async dropAllTables() {
+    switch (this.connection.type) {
+      case "postgres": {
+        const schemas = await this.connection
+          .query("pg_tables")
+          .distinct("schemaname")
+          .whereNotIn("schemaname", ["pg_catalog", "information_schema"])
+          .pluck("schemaname");
+
+        for (const schema of schemas) {
+          if (schema === "public") {
+            const tables = await this.connection
+              .query("pg_tables")
+              .where("schemaname", schema)
+              .pluck("tablename");
+
+            await Promise.all(
+              tables.map((table) =>
+                this.connection.schema.withSchema(schema).dropTable(table)
+              )
+            );
+
+            continue;
+          }
+
+          await this.connection.schema
+            .withSchema(schema)
+            .dropSchema(schema, true);
+        }
+
+        return;
+      }
+
+      // TODO: Add support for other databases
+      default:
+        throw new Error(`Unsupported database type: ${this.connection.type}`);
+    }
   }
 }

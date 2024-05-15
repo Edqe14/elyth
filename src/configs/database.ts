@@ -1,4 +1,6 @@
 const database = {
+  debug: false,
+
   migration: {
     schema: "mvc",
     tableName: "migrations",

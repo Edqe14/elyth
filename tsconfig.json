@@ -118,6 +118,9 @@
       "@middlewares/*": [
         "./src/app/http/middlewares/*"
       ],
+      "@database/*": [
+        "./src/database/*"
+      ],
     }
   }
 }
