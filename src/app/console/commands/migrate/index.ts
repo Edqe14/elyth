@@ -93,12 +93,18 @@ export default class Migrate extends Command {
 
       this.logger.success("All migrations ran successfully");
     } catch (error: any) {
-      const [index, file, errObject] = error as [number, string, Error];
+      if (Array.isArray(error)) {
+        const [index, file, errObject] = error as [number, string, Error];
 
-      this.logger.error(`[${index + 1}] "${file}" errored.`, errObject);
+        this.logger.error(`[${index + 1}] "${file}" errored.`, errObject);
+      } else {
+        this.logger.error("An error occurred");
+        console.log(error);
+      }
     }
 
     await helper.unlock();
+    await helper.cleanUp();
   }
 
   public async runMigration(migration: Migration, connection: Connection) {

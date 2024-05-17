@@ -3,6 +3,7 @@ import knex, { Knex } from "knex";
 export class Connection {
   public readonly driver: Knex;
   public readonly type: "postgres" | "mysql" | "sqlite" | "mssql";
+  private destroyed = false;
 
   constructor(
     public readonly name: string,
@@ -28,5 +29,15 @@ export class Connection {
 
   public get query() {
     return this.driver;
+  }
+
+  public async destroy() {
+    await this.driver.destroy();
+
+    this.destroyed = true;
+  }
+
+  public get isDestroyed() {
+    return this.destroyed;
   }
 }

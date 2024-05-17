@@ -67,14 +67,31 @@ export class MigrationHelper {
   }
 
   public async getLatestGroup() {
-    const latest = await this.query<{ group: string }>(
-      database.migration.tableName
-    )
+    const latest = (await this.query(database.migration.tableName)
       .whereNot("name", "lock")
       .max("group")
-      .first();
+      .first()) as unknown as { max: string };
 
-    return latest ? parseInt(latest.group, 10) : 0;
+    return latest ? parseInt(latest.max, 10) : 0;
+  }
+
+  public async getMigrationsByGroup(groups: number[]) {
+    return this.query<{ name: string }>(database.migration.tableName)
+      .whereIn("group", groups)
+      .whereNot("name", "lock")
+      .select("name")
+      .pluck("name");
+  }
+
+  public async deleteMigrationRecordByGroups(groups: number[]) {
+    await this.query(database.migration.tableName)
+      .whereIn("group", groups)
+      .whereNot("name", "lock")
+      .delete();
+  }
+
+  public async cleanUp() {
+    await this.connection.destroy();
   }
 
   public async dropAllTables() {

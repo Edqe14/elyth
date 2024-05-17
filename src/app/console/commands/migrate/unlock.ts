@@ -1,6 +1,7 @@
 import { DatabaseProvider } from "@providers/database";
 import { Command } from "@console/command";
 import { MigrationHelper } from "@/app/providers/database/migration/helper";
+import type { Connection } from "@providers/database/connection";
 
 type Options = {
   connection: string;
@@ -25,10 +26,12 @@ export default class MigrateUnlock extends Command {
     const isLocked = await helper.isLocked();
 
     if (!isLocked) {
+      await helper.cleanUp();
       return this.logger.info("Migration is not locked.");
     }
 
     await helper.unlock();
+    await helper.cleanUp();
 
     return this.logger.success("Migration unlocked successfully");
   }
