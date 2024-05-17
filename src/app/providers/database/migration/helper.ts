@@ -66,6 +66,17 @@ export class MigrationHelper {
     );
   }
 
+  public async getLatestGroup() {
+    const latest = await this.query<{ group: string }>(
+      database.migration.tableName
+    )
+      .whereNot("name", "lock")
+      .max("group")
+      .first();
+
+    return latest ? parseInt(latest.group, 10) : 0;
+  }
+
   public async dropAllTables() {
     switch (this.connection.type) {
       case "postgres": {

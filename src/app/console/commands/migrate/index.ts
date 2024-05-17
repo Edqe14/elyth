@@ -15,7 +15,7 @@ type Options = {
 export default class Migrate extends Command {
   public signature =
     "migrate {--fresh|f:Drop_all_tables_and_re-run_all_migrations} {--name_<migration>|n:Specify_the_migration_to_run} {--connection_<name>|c:Specify_the_connection_to_use=default}";
-  public description = "Run all pending migrations";
+  public description = "Run migrations";
 
   private databaseProvider = new DatabaseProvider();
   private directory = join(
