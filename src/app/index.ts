@@ -29,6 +29,7 @@ export type AppBaseTypes = SingletonBase & {
     json: <T>(data: T) => Response;
     debugId?: string;
     debugTime?: number;
+    db: Awaited<ReturnType<typeof providers.database.connection>>["driver"];
   } & typeof providers;
 };
 
@@ -53,6 +54,7 @@ export class App extends Elysia<"", false, AppBaseTypes> {
     Object.entries(providers).forEach(([key, value]) =>
       this.decorate(key, value)
     );
+    this.decorate("db", (await providers.database.connection()).driver);
     this.decorateSetters();
 
     this.use(staticPlugin());

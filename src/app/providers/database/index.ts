@@ -1,35 +1,29 @@
 import database from "@/configs/database";
 import { MemoryCacheProvider } from "../cache";
 import { Connection } from "./connection";
-import type { Knex } from "knex";
 
 type ConnectionKey = keyof (typeof database)["connection"];
 
+type ResolvedOf<Key> = Key extends ConnectionKey
+  ? Connection<
+      Awaited<ReturnType<(typeof database.connection)[Key]["resolver"]>>
+    >
+  : never;
+
 export class DatabaseProvider {
-  private cache = new MemoryCacheProvider<string, Connection>();
+  private cache = new MemoryCacheProvider<string, Connection<any>>();
 
-  public getConfigFor(key: ConnectionKey): Knex.Config | undefined {
-    if (!database.connection[key]) return;
+  public async connection<Key extends ConnectionKey>(
+    key: Key = database.defaultConnection as Key
+  ) {
+    if (this.cache.has(key))
+      return this.cache.get(key)! as ResolvedOf<typeof key>;
 
-    return {
-      client: database.connection[key].driver,
-      connection: {
-        ...database.connection[key],
-        connectionString: database.connection[key].url,
-        filename: database.connection[key].database,
-      },
-      debug: database.debug,
-    };
-  }
+    const resolver = database.connection[key as ConnectionKey]?.resolver;
+    if (!resolver) throw new Error(`Connection "${key}" not found`);
 
-  public connection(key: string = database.defaultConnection) {
-    if (this.cache.has(key)) return this.cache.get(key)!;
-
-    const config = this.getConfigFor(key as ConnectionKey);
-    if (!config) return;
-
-    const connection = new Connection(key, config);
-    connection.once("destroyed", () => this.cache.forget(key));
+    const driver = await resolver();
+    const connection = new Connection(key, driver);
 
     this.cache.set(key, connection);
 
