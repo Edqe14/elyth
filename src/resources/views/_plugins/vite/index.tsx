@@ -11,10 +11,7 @@ if (providers.config.get("app.environment") === "production") {
   try {
     viteManifest = require(join(process.cwd(), ".vite", "manifest.json"));
   } catch (error) {
-    providers.logger.error(
-      "Vite manifest not found, please build the application first"
-    );
-    process.exit(1);
+    throw "Vite manifest not found, please build the application first";
   }
 }
 

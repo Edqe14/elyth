@@ -29,18 +29,21 @@ export class MVC extends Commander {
     return await import(`@console/commands/${path}`);
   }
 
+  public async getCommand(name: string) {
+    const cmd = await this.importCommand(name);
+    const build = cmd.default as (new (program: MVC) => Command) | undefined;
+
+    if (!build) return null;
+
+    return new build(this);
+  }
+
   public async run() {
     const [command] = this.args;
 
     try {
-      const cmd = await this.importCommand(command);
-
-      const CommandClass = cmd.default as
-        | (new (program: MVC) => Command)
-        | undefined;
-      if (!CommandClass) throw new Error("Command not found");
-
-      const instance = new CommandClass(this);
+      const instance = await this.getCommand(command);
+      if (!instance) throw new Error("Command not found");
 
       instance.register();
       this.parse();
