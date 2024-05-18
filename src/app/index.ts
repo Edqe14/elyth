@@ -8,6 +8,10 @@ import staticPlugin from "@elysiajs/static";
 import { Html, html } from "@elysiajs/html";
 import providers from "./providers";
 
+export type ParamsOf<Route> = Route extends `${string}/${":" | "*"}${string}`
+  ? Record<GetPathParameter<Route>, string>
+  : never;
+
 export type AppBaseTypes = SingletonBase & {
   decorator: {
     render: <T extends (props: any) => JSX.Element>(
@@ -19,13 +23,18 @@ export type AppBaseTypes = SingletonBase & {
     setStatus: (status: number) => AppBaseTypes["decorator"];
     status: (status: number) => AppBaseTypes["decorator"];
     setCookie: (key: string, value: CookieOptions) => AppBaseTypes["decorator"];
-    redirect: <const Route extends AvailableRoutes>(
-      url: Route | string,
-      params?: Route extends `${string}/${":" | "*"}${string}`
-        ? Record<GetPathParameter<Route>, string>
-        : never,
-      status?: number
-    ) => BunResponse;
+    redirect: {
+      <const Route extends AvailableRoutes>(
+        url: Route,
+        params: ParamsOf<Route>,
+        status?: number
+      ): BunResponse;
+      <const Route extends string>(
+        url: Route,
+        params: ParamsOf<Route>,
+        status?: number
+      ): BunResponse;
+    };
     json: <T>(data: T) => Response;
     debugId?: string;
     debugTime?: number;
