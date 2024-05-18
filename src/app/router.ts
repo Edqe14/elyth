@@ -40,7 +40,8 @@ export class Router<
     return (async (ctx) => {
       const [Controller, method] = handler;
       const controller =
-        this.app.cache.get<ControllerType>(Controller.name) ?? new Controller();
+        (this.app.providers.cache.get(Controller.name) as ControllerType) ??
+        new Controller();
 
       // @ts-ignore
       if (!controller[method]) {
@@ -260,7 +261,8 @@ export class Router<
 
       for (const handler of handlers) {
         const handlerInstance =
-          this.app.cache.get<Middleware>(handler.name) ?? new handler();
+          (this.app.providers.cache.get(handler.name) as Middleware) ??
+          new handler();
         const response = await handlerInstance.handle(ctx);
 
         if (response) return response;
