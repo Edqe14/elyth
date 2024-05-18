@@ -5,16 +5,17 @@ import { join } from "path";
 import { Glob } from "bun";
 import { Migration } from "@providers/database/migration";
 import { Connection } from "@providers/database/connection";
+import database from "@configs/database";
 
 type Options = {
   fresh: boolean;
   name: string | false;
-  connection: string;
+  connection: string | false;
 };
 
 export default class Migrate extends Command {
   public signature =
-    "migrate {--fresh|f:Drop_all_tables_and_re-run_all_migrations} {--name_<migration>|n:Specify_the_migration_to_run} {--connection_<name>|c:Specify_the_connection_to_use=default}";
+    "migrate {--fresh|f:Drop_all_tables_and_re-run_all_migrations} {--name_<migration>|n:Specify_the_migration_to_run} {--connection_<name>|c:Specify_the_connection_to_use}";
   public description = "Run migrations";
 
   private databaseProvider = new DatabaseProvider();
@@ -29,7 +30,9 @@ export default class Migrate extends Command {
   );
 
   public async handle(options: Options) {
-    const connection = this.databaseProvider.connection(options.connection);
+    const connection = this.databaseProvider.connection(
+      options.connection || database.defaultConnection
+    );
     if (!connection) {
       return this.logger.error(`Connection ${options.connection} not found`);
     }

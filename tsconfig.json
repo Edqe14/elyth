@@ -121,6 +121,9 @@
       "@database/*": [
         "./src/database/*"
       ],
+      "@models/*": [
+        "./src/app/models/*"
+      ],
     }
   }
 }

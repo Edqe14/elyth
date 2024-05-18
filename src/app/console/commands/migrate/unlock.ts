@@ -1,21 +1,23 @@
 import { DatabaseProvider } from "@providers/database";
 import { Command } from "@console/command";
 import { MigrationHelper } from "@/app/providers/database/migration/helper";
-import type { Connection } from "@providers/database/connection";
+import database from "@configs/database";
 
 type Options = {
-  connection: string;
+  connection: string | false;
 };
 
 export default class MigrateUnlock extends Command {
   public signature =
-    "migrate:unlock {--connection_<name>|c:Specify_the_connection_to_use=default}";
+    "migrate:unlock {--connection_<name>|c:Specify_the_connection_to_use}";
   public description = "Unlock migrations";
 
   private databaseProvider = new DatabaseProvider();
 
   public async handle(options: Options) {
-    const connection = this.databaseProvider.connection(options.connection);
+    const connection = this.databaseProvider.connection(
+      options.connection || database.defaultConnection
+    );
     if (!connection) {
       return this.logger.error(`Connection ${options.connection} not found`);
     }

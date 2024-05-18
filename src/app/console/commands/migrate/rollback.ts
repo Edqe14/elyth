@@ -4,15 +4,16 @@ import { MigrationHelper } from "@providers/database/migration/helper";
 import { join } from "path";
 import { Migration } from "@providers/database/migration";
 import { Connection } from "@providers/database/connection";
+import database from "@configs/database";
 
 type Options = {
-  connection: string;
+  connection: string | false;
   steps: string;
 };
 
 export default class MigrateRollback extends Command {
   public signature =
-    "migrate:rollback {--steps_<amount>|s:How_many_steps_to_rollback=1} {--connection_<name>|c:Specify_the_connection_to_use=default}";
+    "migrate:rollback {--steps_<amount>|s:How_many_steps_to_rollback=1} {--connection_<name>|c:Specify_the_connection_to_use}";
   public description = "Roll back migrations";
 
   private databaseProvider = new DatabaseProvider();
@@ -27,7 +28,9 @@ export default class MigrateRollback extends Command {
   );
 
   public async handle(options: Options) {
-    const connection = this.databaseProvider.connection(options.connection);
+    const connection = this.databaseProvider.connection(
+      options.connection || database.defaultConnection
+    );
     if (!connection) {
       return this.logger.error(`Connection ${options.connection} not found`);
     }

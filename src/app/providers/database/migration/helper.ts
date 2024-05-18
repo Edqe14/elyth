@@ -127,6 +127,59 @@ export class MigrationHelper {
         return;
       }
 
+      // NOTE: UNTESTED
+      case "mysql": {
+        await this.connection.query.raw("SET FOREIGN_KEY_CHECKS = 0;");
+
+        const tables = await this.connection
+          .query("information_schema.tables")
+          .where("table_schema", this.connection.query.raw`DATABASE()`)
+          .pluck("table_name");
+
+        await Promise.all(
+          tables.map((table) => this.connection.schema.dropTable(table))
+        );
+
+        await this.connection.query.raw("SET FOREIGN_KEY_CHECKS = 1;");
+
+        return;
+      }
+
+      // NOTE: UNTESTED
+      case "sqlite": {
+        await this.connection.query.raw("PRAGMA writable_schema = 1;");
+
+        await this.connection
+          .query("sqlite_master")
+          .whereIn("type", ["table", "index", "trigger"])
+          .delete();
+
+        await this.connection.query.raw("PRAGMA writable_schema = 0;");
+        await this.connection.query.raw("VACUUM;");
+
+        return;
+      }
+
+      // NOTE: UNTESTED
+      case "mssql": {
+        await this.connection.query.raw(`
+          EXEC sp_MSforeachtable 'ALTER TABLE ? NOCHECK CONSTRAINT ALL';
+          EXEC sp_MSforeachtable 'DROP TABLE ?';
+          EXEC sp_MSforeachtable 'DROP VIEW ?';
+          DECLARE @cmd NVARCHAR(4000);
+          -- Drop functions
+          SELECT @cmd = 'DROP FUNCTION [' + ROUTINE_SCHEMA + '].[' + ROUTINE_NAME + ']'
+          FROM INFORMATION_SCHEMA.ROUTINES
+          WHERE ROUTINE_TYPE = 'FUNCTION';
+          EXEC sp_executesql @cmd;
+          -- Drop procedures
+          SELECT @cmd = 'DROP PROCEDURE [' + ROUTINE_SCHEMA + '].[' + ROUTINE_NAME + ']'
+          FROM INFORMATION_SCHEMA.ROUTINES
+          WHERE ROUTINE_TYPE = 'PROCEDURE';
+          EXEC sp_executesql @cmd;
+        `);
+      }
+
       // TODO: Add support for other databases
       default:
         throw new Error(`Unsupported database type: ${this.connection.type}`);

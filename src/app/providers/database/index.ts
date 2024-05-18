@@ -22,13 +22,14 @@ export class DatabaseProvider {
     };
   }
 
-  public connection(key = "default") {
-    if (this.cache.has(key)) return this.cache.get(key);
+  public connection(key: string = database.defaultConnection) {
+    if (this.cache.has(key)) return this.cache.get(key)!;
 
     const config = this.getConfigFor(key as ConnectionKey);
     if (!config) return;
 
     const connection = new Connection(key, config);
+    connection.once("destroyed", () => this.cache.forget(key));
 
     this.cache.set(key, connection);
 

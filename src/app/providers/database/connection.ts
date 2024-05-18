@@ -1,6 +1,7 @@
 import knex, { Knex } from "knex";
+import { EventEmitter } from "events";
 
-export class Connection {
+export class Connection extends EventEmitter {
   public readonly driver: Knex;
   public readonly type: "postgres" | "mysql" | "sqlite" | "mssql";
   private destroyed = false;
@@ -9,6 +10,8 @@ export class Connection {
     public readonly name: string,
     public readonly config: Knex.Config
   ) {
+    super();
+
     this.driver = knex(config);
     this.type = Connection.getConnectionType(config.client as string);
   }
@@ -23,6 +26,13 @@ export class Connection {
     return "postgres";
   }
 
+  public get database() {
+    return (
+      this.driver.client?.config?.connection?.filename ??
+      this.driver.client?.config?.connection?.database
+    );
+  }
+
   public get schema() {
     return this.driver.schema;
   }
@@ -32,7 +42,11 @@ export class Connection {
   }
 
   public async destroy() {
+    if (this.destroyed) return;
+
     await this.driver.destroy();
+
+    this.emit("destroyed");
 
     this.destroyed = true;
   }

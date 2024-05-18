@@ -6,6 +6,8 @@ const database = {
     tableName: "migrations",
   },
 
+  defaultConnection: "default",
+
   connection: {
     default: {
       driver: process.env.DB_DRIVER,
