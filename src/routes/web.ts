@@ -3,7 +3,4 @@ import Welcome from "@/resources/views/welcome";
 
 export default app
   .createRouter()
-  .get("/", (ctx) => ctx.render(Welcome, { name: "Elysia" }))
-  .get("/json", () => ({
-    message: "Hi",
-  }));
+  .get("/", (ctx) => ctx.render(Welcome, { name: "Elysia" }));
