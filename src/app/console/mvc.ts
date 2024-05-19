@@ -15,6 +15,7 @@ export class MVC extends Commander {
     this.helpCommand("help");
     this.description("Elysia MVC CLI tool");
     this.option("--production", "Run in production mode");
+    this.option("-w, --watch", "Automatically restart on file changes");
 
     this.allowUnknownOption(true);
     this.parse();

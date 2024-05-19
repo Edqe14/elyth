@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "test": "bun test",
-    "mvc": "bun run src/app/console/mvc.ts --production",
-    "dev": "bun run --watch src/app/console/mvc.ts"
+    "mvc": "bun run src/app/console/kernel.ts"
   },
   "dependencies": {
     "@elysiajs/html": "^1.0.2",
