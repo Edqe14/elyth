@@ -35,6 +35,10 @@ export abstract class GeneratorCommand extends Command {
     return stub.replace("name", command.args[0] as string).render();
   }
 
+  public getStub(name: string, options: Record<string, boolean>) {
+    return this.stub;
+  }
+
   public async handle(...args: [...(string | object)[], Commander]) {
     const name = args.shift() as string;
     const command = args.pop() as Commander;
@@ -45,7 +49,9 @@ export abstract class GeneratorCommand extends Command {
       return this.logger.error(`${this.name} "${name}" already exists`);
     }
 
-    const stub = await this.stubProvider.get(this.stub ?? camelCase(this.name));
+    const stub = await this.stubProvider.get(
+      this.getStub(name, options) ?? camelCase(this.name)
+    );
     if (!stub) {
       return this.logger.error(`${this.name} stub not found`);
     }
