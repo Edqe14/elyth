@@ -22,6 +22,6 @@
   },
   "module": "src/index.js",
   "bun-create": {
-    "start": "bun run src/index.ts"
+    "start": "bun run src/app/console/kernel.ts serve"
   }
 }
