@@ -1,15 +1,24 @@
-# Elysia with Bun runtime
+# Elyth
+
+Laravel inspired HTTP Server starter template, powered by Bun & Elysia.
+
+## Features
+
+1. MVC Architecture
+2. Router & middlewares
+3. SSR with TSX + Vite
+4. Modular & extensible
 
 ## Getting Started
-To get started with this template, simply paste this command into your terminal:
-```bash
-bun create elysia ./elysia-example
-```
 
-## Development
-To start the development server run:
-```bash
-bun run dev
-```
+1. Download the f& extract it
+2. Run `bun install`
+3. Run the development server by `bun mvc serve`
 
-Open http://localhost:3000/ with your browser to see the result.
+## Documentation
+
+[WIP](https://www.notion.so/edqe/Elyth-Documentation-30091bd2ef65473fa98b297653251464)
+
+## License
+
+[MIT](LICENSE)

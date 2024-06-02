@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "aaron-bond.better-comments",
+    "mikestead.dotenv",
+    "yoavbls.pretty-ts-errors",
+    "gruntfuggly.todo-tree"
+  ]
+}
